@@ -139,6 +139,120 @@ Cadastra um novo aluno no sistema.
 }
 ```
 
+### GET /api/alunos
+
+Lista todos os alunos cadastrados no sistema.
+
+**Respostas:**
+
+- **200 OK** - Lista de alunos retornada com sucesso
+```json
+{
+  "sucesso": true,
+  "total": 2,
+  "alunos": [
+    {
+      "id": 1,
+      "nome_completo": "João Silva",
+      "usuario_acesso": "joao.silva",
+      "email_aluno": "joao.silva@example.com",
+      "observacao": "Aluno do curso de informática",
+      "created_at": "2024-11-18T10:30:00.000Z"
+    },
+    {
+      "id": 2,
+      "nome_completo": "Maria Santos",
+      "usuario_acesso": "maria.santos",
+      "email_aluno": "maria.santos@example.com",
+      "observacao": null,
+      "created_at": "2024-11-18T11:15:00.000Z"
+    }
+  ]
+}
+```
+
+- **500 Internal Server Error** - Erro ao buscar alunos
+
+### GET /api/alunos/:id
+
+Busca um aluno específico pelo seu ID.
+
+**Parâmetros da URL:**
+- `id` - ID do aluno (número inteiro)
+
+**Respostas:**
+
+- **200 OK** - Aluno encontrado
+```json
+{
+  "sucesso": true,
+  "aluno": {
+    "id": 1,
+    "nome_completo": "João Silva",
+    "usuario_acesso": "joao.silva",
+    "email_aluno": "joao.silva@example.com",
+    "observacao": "Aluno do curso de informática",
+    "created_at": "2024-11-18T10:30:00.000Z"
+  }
+}
+```
+
+- **400 Bad Request** - ID inválido
+```json
+{
+  "erro": "ID inválido",
+  "mensagem": "O ID deve ser um número válido"
+}
+```
+
+- **404 Not Found** - Aluno não encontrado
+```json
+{
+  "erro": "Aluno não encontrado",
+  "mensagem": "Nenhum aluno encontrado com o ID 999"
+}
+```
+
+### GET /api/alunos/usuario/:usuario_acesso
+
+Busca um aluno pelo seu nome de usuário de acesso.
+
+**Parâmetros da URL:**
+- `usuario_acesso` - Nome de usuário de acesso do aluno
+
+**Respostas:**
+
+- **200 OK** - Aluno encontrado
+```json
+{
+  "sucesso": true,
+  "aluno": {
+    "id": 1,
+    "nome_completo": "João Silva",
+    "usuario_acesso": "joao.silva",
+    "email_aluno": "joao.silva@example.com",
+    "observacao": "Aluno do curso de informática",
+    "created_at": "2024-11-18T10:30:00.000Z"
+  }
+}
+```
+
+- **400 Bad Request** - Usuário inválido
+```json
+{
+  "erro": "Usuário inválido",
+  "mensagem": "O usuario_acesso não pode estar vazio"
+}
+```
+
+- **404 Not Found** - Aluno não encontrado
+```json
+{
+  "erro": "Aluno não encontrado",
+  "mensagem": "Nenhum aluno encontrado com o usuário \"joao.silva\""
+}
+```
+
 ### GET /health
 
 Endpoint de health check para verificar se o servidor está funcionando.

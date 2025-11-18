@@ -1,0 +1,26 @@
+services:
+  - type: web
+    name: apiCadastroAlunos
+    env: node
+    plan: free
+    buildCommand: npm install
+    startCommand: node index.js
+    envVars:
+      - key: DB_HOST
+        scope: build
+        value: serverdbp2.mysql.database.azure.com
+      - key: DB_USER
+        scope: build
+        value: useradmin
+      - key: DB_PASSWORD
+        scope: build
+        sync: false
+      - key: DB_NAME
+        scope: build
+        value: db_toledo
+      - key: NODE_ENV
+        scope: build
+        value: production
+      - key: DB_PORT
+        scope: build
+        value: 3306

@@ -1,3 +1,32 @@
+# API Cadastro de Alunos
+
+## Configuração do banco (.env)
+
+Crie um arquivo `.env` na raiz do projeto (um arquivo de exemplo `.env` já foi adicionado). Preencha as variáveis:
+
+- `DB_HOST` - host do MySQL (ex: `serverdbp2.mysql.database.azure.com`)
+- `DB_USER` - usuário no formato `user@servername` (Azure MySQL exige esse formato)
+- `DB_PASSWORD` - senha do usuário
+- `DB_NAME` - nome do banco de dados
+- `DB_PORT` - (opcional) porta, padrão `3306`
+- `DB_SSL` - (opcional) `true` para forçar SSL. Por padrão o código ativa SSL automaticamente para hosts `*.mysql.database.azure.com`.
+- `DB_SSL_CA` - (opcional) caminho para o certificado CA, se o servidor requerer um CA específico.
+
+Exemplo mínimo:
+
+```
+DB_HOST=serverdbp2.mysql.database.azure.com
+DB_USER=useradmin@serverdbp2
+DB_PASSWORD=yourpassword
+DB_NAME=db_toledo
+DB_PORT=3306
+PORT=3000
+```
+
+Problemas comuns:
+
+- "Access denied for user": verifique se o `DB_USER` existe e a senha está correta; no Azure é comum precisar criar o usuário e conceder permissões. Também confirme as regras de firewall do servidor Azure (permissão ao IP cliente).
+- Erros de SSL: defina `DB_SSL=true` e, se necessário, aponte `DB_SSL_CA` para o arquivo CA.
 # API de Cadastro de Alunos
 
 API back-end desenvolvida em Node.js com Express.js para cadastro seguro de alunos utilizando MySQL.

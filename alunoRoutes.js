@@ -33,7 +33,7 @@ function validateRequiredFields(body) {
   return errors;
 }
 
-// Endpoint POST /api/alunos/cadastro
+// Endpoint POST /cadastro - Cadastrar novo aluno
 router.post('/cadastro', async (req, res) => {
   try {
     const { nome_completo, usuario_acesso, senha_hash, email_aluno, observacao } = req.body;
@@ -68,9 +68,10 @@ router.post('/cadastro', async (req, res) => {
     }
 
     // Inserção no banco de dados usando query parametrizada
+    // Incluindo o campo foto como NULL (já que não é enviado pelo front-end)
     const query = `
-      INSERT INTO alunos (nome_completo, usuario_acesso, senha_hash, email_aluno, observacao)
-      VALUES (?, ?, ?, ?, ?)
+      INSERT INTO alunos (nome_completo, usuario_acesso, senha_hash, email_aluno, observacao, foto)
+      VALUES (?, ?, ?, ?, ?, NULL)
     `;
 
     const [result] = await pool.execute(query, [
@@ -85,7 +86,7 @@ router.post('/cadastro', async (req, res) => {
     res.status(201).json({
       sucesso: true,
       mensagem: 'Aluno cadastrado com sucesso',
-      id: result.insertId
+      id_aluno: result.insertId
     });
 
   } catch (error) {
@@ -108,13 +109,13 @@ router.post('/cadastro', async (req, res) => {
   }
 });
 
-// Endpoint GET /api/alunos - Listar todos os alunos
+// Endpoint GET / - Listar todos os alunos (sem a senha)
 router.get('/', async (req, res) => {
   try {
     const query = `
-      SELECT id, nome_completo, usuario_acesso, email_aluno, observacao, created_at
+      SELECT id_aluno, nome_completo, usuario_acesso, email_aluno, observacao, data_cadastro, foto
       FROM alunos
-      ORDER BY created_at DESC
+      ORDER BY data_cadastro DESC
     `;
 
     const [alunos] = await pool.execute(query);
@@ -133,13 +134,13 @@ router.get('/', async (req, res) => {
   }
 });
 
-// Endpoint GET /api/alunos/:id - Buscar aluno por ID
+// Endpoint GET /:id - Buscar aluno por id_aluno
 router.get('/:id', async (req, res) => {
   try {
     const { id } = req.params;
 
-    // Validação de ID
-    if (!id || isNaN(id)) {
+    // Validação de ID - deve ser um número inteiro válido
+    if (!id || isNaN(id) || !Number.isInteger(Number(id))) {
       return res.status(400).json({
         erro: 'ID inválido',
         mensagem: 'O ID deve ser um número válido'
@@ -147,9 +148,9 @@ router.get('/:id', async (req, res) => {
     }
 
     const query = `
-      SELECT id, nome_completo, usuario_acesso, email_aluno, observacao, created_at
+      SELECT id_aluno, nome_completo, usuario_acesso, email_aluno, observacao, data_cadastro, foto
       FROM alunos
-      WHERE id = ?
+      WHERE id_aluno = ?
     `;
 
     const [alunos] = await pool.execute(query, [id]);
@@ -174,21 +175,21 @@ router.get('/:id', async (req, res) => {
   }
 });
 
-// Endpoint GET /api/alunos/usuario/:usuario_acesso - Buscar aluno por usuário de acesso
+// Endpoint GET /usuario/:usuario_acesso - Buscar aluno por usuario_acesso
 router.get('/usuario/:usuario_acesso', async (req, res) => {
   try {
     const { usuario_acesso } = req.params;
 
-    // Validação de usuário
+    // Validação de usuário - não pode estar vazio
     if (!usuario_acesso || usuario_acesso.trim() === '') {
       return res.status(400).json({
         erro: 'Usuário inválido',
-        mensagem: 'O usuário_acesso não pode estar vazio'
+        mensagem: 'O usuario_acesso não pode estar vazio'
       });
     }
 
     const query = `
-      SELECT id, nome_completo, usuario_acesso, email_aluno, observacao, created_at
+      SELECT id_aluno, nome_completo, usuario_acesso, email_aluno, observacao, data_cadastro, foto
       FROM alunos
       WHERE usuario_acesso = ?
     `;

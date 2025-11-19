@@ -5,11 +5,27 @@ const alunoRoutes = require('./alunoRoutes');
 const app = express();
 const PORT = process.env.PORT || 3000;
 
+// Lista de origens permitidas (GitHub Pages, localhost e Render)
+const allowedOrigins = [
+  'https://gustavo03toledo.github.io',
+  'http://localhost:3000',
+  'http://localhost:8080',
+  'https://apicadastroalunos.onrender.com'
+];
+
 // Middleware para CORS
 app.use((req, res, next) => {
+  const origin = req.headers.origin;
+  
+  // Permitir acesso de qualquer origem (para desenvolvimento/testes)
+  // Em produção, você pode usar a lista allowedOrigins acima
   res.header('Access-Control-Allow-Origin', '*');
-  res.header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
+  res.header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS, PATCH');
   res.header('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept, Authorization');
+  res.header('Access-Control-Max-Age', '3600');
+  res.header('Access-Control-Allow-Credentials', 'true');
+  
+  // Responder imediatamente a requisições OPTIONS (preflight)
   if (req.method === 'OPTIONS') {
     return res.sendStatus(200);
   }

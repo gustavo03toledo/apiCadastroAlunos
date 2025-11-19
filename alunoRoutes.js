@@ -68,10 +68,9 @@ router.post('/cadastro', async (req, res) => {
     }
 
     // Inserção no banco de dados usando query parametrizada
-    // Incluindo o campo foto como NULL (já que não é enviado pelo front-end)
     const query = `
-      INSERT INTO alunos (nome_completo, usuario_acesso, senha_hash, email_aluno, observacao, foto)
-      VALUES (?, ?, ?, ?, ?, NULL)
+      INSERT INTO alunos (nome_completo, usuario_acesso, senha_hash, email_aluno, observacao)
+      VALUES (?, ?, ?, ?, ?)
     `;
 
     const [result] = await pool.execute(query, [
@@ -86,7 +85,7 @@ router.post('/cadastro', async (req, res) => {
     res.status(201).json({
       sucesso: true,
       mensagem: 'Aluno cadastrado com sucesso',
-      id_aluno: result.insertId
+      id: result.insertId
     });
 
   } catch (error) {
@@ -113,9 +112,9 @@ router.post('/cadastro', async (req, res) => {
 router.get('/', async (req, res) => {
   try {
     const query = `
-      SELECT id_aluno, nome_completo, usuario_acesso, email_aluno, observacao, data_cadastro, foto
+      SELECT id, nome_completo, usuario_acesso, email_aluno, observacao, created_at
       FROM alunos
-      ORDER BY data_cadastro DESC
+      ORDER BY created_at DESC
     `;
 
     const [alunos] = await pool.execute(query);
@@ -134,48 +133,8 @@ router.get('/', async (req, res) => {
   }
 });
 
-// Endpoint GET /:id - Buscar aluno por id_aluno
-router.get('/:id', async (req, res) => {
-  try {
-    const { id } = req.params;
-
-    // Validação de ID - deve ser um número inteiro válido
-    if (!id || isNaN(id) || !Number.isInteger(Number(id))) {
-      return res.status(400).json({
-        erro: 'ID inválido',
-        mensagem: 'O ID deve ser um número válido'
-      });
-    }
-
-    const query = `
-      SELECT id_aluno, nome_completo, usuario_acesso, email_aluno, observacao, data_cadastro, foto
-      FROM alunos
-      WHERE id_aluno = ?
-    `;
-
-    const [alunos] = await pool.execute(query, [id]);
-
-    if (alunos.length === 0) {
-      return res.status(404).json({
-        erro: 'Aluno não encontrado',
-        mensagem: `Nenhum aluno encontrado com o ID ${id}`
-      });
-    }
-
-    res.status(200).json({
-      sucesso: true,
-      aluno: alunos[0]
-    });
-  } catch (error) {
-    console.error('Erro ao buscar aluno por ID:', error);
-    res.status(500).json({
-      erro: 'Erro interno do servidor',
-      mensagem: 'Não foi possível buscar o aluno'
-    });
-  }
-});
-
 // Endpoint GET /usuario/:usuario_acesso - Buscar aluno por usuario_acesso
+// IMPORTANTE: Esta rota deve vir ANTES de /:id para evitar conflito de rotas
 router.get('/usuario/:usuario_acesso', async (req, res) => {
   try {
     const { usuario_acesso } = req.params;
@@ -189,7 +148,7 @@ router.get('/usuario/:usuario_acesso', async (req, res) => {
     }
 
     const query = `
-      SELECT id_aluno, nome_completo, usuario_acesso, email_aluno, observacao, data_cadastro, foto
+      SELECT id, nome_completo, usuario_acesso, email_aluno, observacao, created_at
       FROM alunos
       WHERE usuario_acesso = ?
     `;
@@ -209,6 +168,48 @@ router.get('/usuario/:usuario_acesso', async (req, res) => {
     });
   } catch (error) {
     console.error('Erro ao buscar aluno por usuário:', error);
+    res.status(500).json({
+      erro: 'Erro interno do servidor',
+      mensagem: 'Não foi possível buscar o aluno'
+    });
+  }
+});
+
+// Endpoint GET /:id - Buscar aluno por id
+// IMPORTANTE: Esta rota deve vir DEPOIS de rotas específicas como /usuario/:usuario_acesso
+router.get('/:id', async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    // Validação de ID - deve ser um número inteiro válido
+    if (!id || isNaN(id) || !Number.isInteger(Number(id))) {
+      return res.status(400).json({
+        erro: 'ID inválido',
+        mensagem: 'O ID deve ser um número válido'
+      });
+    }
+
+    const query = `
+      SELECT id, nome_completo, usuario_acesso, email_aluno, observacao, created_at
+      FROM alunos
+      WHERE id = ?
+    `;
+
+    const [alunos] = await pool.execute(query, [id]);
+
+    if (alunos.length === 0) {
+      return res.status(404).json({
+        erro: 'Aluno não encontrado',
+        mensagem: `Nenhum aluno encontrado com o ID ${id}`
+      });
+    }
+
+    res.status(200).json({
+      sucesso: true,
+      aluno: alunos[0]
+    });
+  } catch (error) {
+    console.error('Erro ao buscar aluno por ID:', error);
     res.status(500).json({
       erro: 'Erro interno do servidor',
       mensagem: 'Não foi possível buscar o aluno'
